@@ -1,293 +1,138 @@
-# Automação de Extração de Comentários do Bot PR-Validation-Gemini-2
+# 🤖 Extrator de Comentários do Bot PR-Validation-Gemini-2
 
-Este projeto extrai automaticamente todos os comentários feitos pelo bot **pr-validation-gemini-2** em Pull Requests do GitHub e exporta para um arquivo JSON estruturado.
+Automação em Python que extrai comentários do bot **pr-validation-gemini-2** de Pull Requests do GitHub e exporta para JSON.
 
-## 📋 Funcionalidades
+## 🚀 Instalação Rápida
 
-- ✅ Busca todos os Pull Requests de um repositório
-- ✅ Extrai comentários de revisão de código feitos pelo bot
-- ✅ Captura informações detalhadas:
-  - Código comentado
-  - Linha específica do arquivo
-  - Sugestão do bot
-  - Arquivo e caminho
-  - Dados do Pull Request
-  - Timestamp dos comentários
-- ✅ Exporta tudo em formato JSON estruturado
-- ✅ Suporta tokens Fine-grained e Classic do GitHub
-
-## 🔧 Pré-requisitos
-
-- Python 3.7 ou superior
-- Conta no GitHub com acesso ao repositório
-- Token de acesso do GitHub (Personal Access Token)
-
-## 📦 Instalação
-
-1. **Clone ou baixe este projeto**
-
-2. **Instale as dependências:**
 ```bash
+# 1. Instalar dependências
 pip install -r requirements.txt
-```
 
-3. **Configure o arquivo `.env`:**
-```bash
-# Copie o arquivo de exemplo
+# 2. Configurar credenciais
 copy .env.example .env
+# Edite o .env com suas informações
 ```
 
-4. **Edite o arquivo `.env` com suas informações:**
+## ⚙️ Configuração do .env
+
 ```env
+# Token do GitHub (https://github.com/settings/tokens)
 GITHUB_TOKEN=seu_token_aqui
-GITHUB_OWNER=nome_do_dono_do_repositorio
-GITHUB_REPO=nome_do_repositorio
+
+# Informações do repositório
+# Exemplo: https://github.com/CareplusBR/meu-repo
+GITHUB_OWNER=CareplusBR
+GITHUB_REPO=meu-repo
+
+# [Opcional] Desabilitar SSL (apenas em ambientes corporativos com proxy)
+DISABLE_SSL_VERIFY=false
 ```
 
-## 🔑 Como Criar o Token do GitHub
-
-### Opção 1: Fine-grained Token (Recomendado - Mais Seguro)
-
-1. Acesse: https://github.com/settings/personal-access-tokens/new
-2. Configurações necessárias:
-   - **Token name**: Nome descritivo (ex: "Bot Comments Extractor")
-   - **Expiration**: Escolha a validade do token
-   - **Repository access**: Selecione o repositório específico
-   - **Permissions** → **Repository permissions**:
-     - `Pull requests`: **Read-only** ✅
-3. Clique em **Generate token**
-4. **Copie o token** (você não poderá vê-lo novamente!)
-
-### Opção 2: Classic Token
+### 🔑 Como criar o Token
 
 1. Acesse: https://github.com/settings/tokens/new
-2. Configurações necessárias:
-   - **Note**: Nome descritivo
-   - **Expiration**: Escolha a validade
-   - **Select scopes**:
-     - ✅ `public_repo` (para repositórios públicos)
-     - ✅ `repo` (para repositórios privados - full control)
-3. Clique em **Generate token**
-4. **Copie o token**
+2. Marque o escopo: **`repo`** (Full control)
+3. Gere e copie o token
+4. Cole no `.env`
 
-## ▶️ Como Usar
+## 📋 Como Usar
 
-1. **Execute o script:**
+### Extrair Comentários de um PR Específico
+
 ```bash
-python github_pr_comments_extractor.py
+# Forma 1: Direto com número do PR
+python extrair_pr_especifico.py 102
+
+# Forma 2: Script interativo (solicita o número)
+python extrair_pr_especifico.py
+
+# Forma 3: Atalho Windows
+extrair_pr.bat 102
 ```
 
-2. **Escolha o modo de extração:**
-
-O script perguntará o que você deseja fazer:
-
-```
-Opções de extração:
-  1 - Extrair de um PR específico
-  2 - Extrair de todos os PRs
-
-Digite sua escolha (1 ou 2):
-```
-
-### Opção 1: PR Específico
-
-- Digite `1` e pressione Enter
-- Digite o número do Pull Request (ex: `123`)
-- O script processará apenas aquele PR
-- Arquivo salvo como: `comments-gemimi/bot_comments_PR123.json` ✨
-- **Formato**: Apenas 4 campos essenciais (filtrado)
-
-💡 **Use esta opção quando**: Você quer analisar um PR específico rapidamente.
-
-### Opção 2: Todos os PRs
-
-- Digite `2` e pressione Enter
-- O script buscará e processará todos os Pull Requests
-- **Formato**: Completo com todos os campos
-- Arquivo salvo como: `bot_comments.json`
-
-💡 **Use esta opção quando**: Você quer uma análise completa do repositório.
-
-3. **Acompanhe o progresso no console:**
-```
-===========================================================
-EXTRATOR DE COMENTÁRIOS DO BOT PR-VALIDATION-GEMINI-2
-===========================================================
-Buscando Pull Requests do repositório owner/repo...
-Encontrados 50 Pull Requests. Processando...
-[1/50] Processando PR #123: Feature XYZ
-  ✓ Encontrados 5 comentários do bot
-[2/50] Processando PR #122: Fix bug ABC
-  - Nenhum comentário do bot encontrado
-...
-```
-
-## 📄 Formato do JSON de Saída
-
-### Formato Filtrado (Padrão para PRs específicos)
-
-Os arquivos salvos na pasta `comments-gemimi/` contêm apenas os 4 campos essenciais:
+**Resultado:**
+- Arquivo salvo em: `comments-gemimi/bot_comments_PR102.json`
+Cada extração gera um arquivo JSON com 4 campos essenciais:
 
 ```json
 {
   "metadata": {
-    "repository": "owner/repo",
-    "bot_username": "pr-validation-gemini-2",
+    "repository": "CareplusBR/meu-repo",
     "total_comments": 20,
-    "extracted_at": "2026-02-20T10:30:00",
     "format": "filtered"
   },
   "comments": [
     {
-      "file_path": "src/main.py",
-      "diff_hunk": "@@ -42,6 +42,7 @@...",
-      "code_snippet": "def funcao():\n    return valor",
-      "comment_body": "Sugestão: Adicionar validação de tipo aqui..."
+      "file_path": "src/app/component.ts",
+      "diff_hunk": "@@ -48,7 +48,7 @@\n-  old code\n+  new code",
+      "code_snippet": "código extraído do diff",
+      "comment_body": "Sugestão do bot aqui..."
     }
   ]
 }
 ```
 
-### Formato Completo (Todos os PRs)
+**Campos:**
+- `file_path` - Caminho do arquivo comentado
+- `diff_hunk` - Diff do Git com contexto
+- `code_snippet` - Código limpo extraído
+- `comment_body` - Comentário/sugestão do bot
 
-O arquivo `bot_comments.json` terá a seguinte estrutura completa:
+### Todos os PRs (Completo - 16 campos)
 
-```json
-{
-  "metadata": {
-    "repository": "owner/repo",
-    "bot_username": "pr-validation-gemini-2",
-    "total_comments": 150,
-    "extracted_at": "2026-02-20T10:30:00",
-    "format": "complete"
-  },
-  "comments": [
-    {
-      "pr_number": 123,
-      "pr_title": "Feature: Adiciona nova funcionalidade",
-      "pr_url": "https://github.com/owner/repo/pull/123",
-      "pr_state": "open",
-      "file_path": "src/main.py",
-      "line": 45,
-      "original_line": 45,
-      "diff_hunk": "@@ -42,6 +42,7 @@...",
-      "code_snippet": "def funcao():\n    return valor",
-      "comment_body": "Sugestão: Adicionar validação de tipo aqui...",
-      "comment_created_at": "2026-02-20T09:15:30Z",
-      "comment_updated_at": "2026-02-20T09:15:30Z",
-      "comment_url": "https://github.com/owner/repo/pull/123#discussion_r123456",
-      "commit_id": "abc123def456",
-      "in_reply_to_id": null
-    }
-  ]
-}
+Inclui: PR info, timestamps, URLs, linha do código, etc.
+
+##Arquivo | Descrição |
+|---------|-----------|
+| `extrair_pr_especifico.py` | Script principal - extrai comentários de um PR |
+| `extrair_pr.bat` | Atalho Windows para executar o script |
+| `instalar.bat` | Instala dependências e configura o projeto
+| `extrair_pr_especifico.py` | Extrai PR específico | `python extrair_pr_especifico.py 102` |
+| `github_pr_comments_extractor.py` | Script principal interativo | `python github_pr_comments_extractor.py` |
+
+## ❓ Troubleshooting
+
+| Erro | Solução |
+|------|---------|
+| `GITHUB_TOKEN não definida` | Configure o arquivo `.env` |
+| `401 Unauthorized` | Token inválido - gere um novo |
+| `403 Forbidden` | Token sem permissão - adicione escopo `repo` |
+| `404 Not Found` | Verifique GITHUB_OWNER e GITHUB_REPO |
+| `SSL: CERTIFICATE_VERIFY_FAILED` | Configure `DISABLE_SSL_VERIFY=true` no `.env` |
+| Nenhum comentário encontrado | Verifique se o bot comentou no PR |
+
+## 📁 Estrutura de Pastas
+extraídos dos PRs
+│   └── bot_comments_PR{numero}.json
+├── extrair_pr_especifico.py  # Script principal
+├── github_pr_comments_extractor.py  # Classe do extrator
+├── extrair_pr.bat            # Atalho Windows
+├── instalar.bat              # Instalador
+├── .env                      # Suas credenciais
+├── .env.example              # Modelo de configuração
+└── requirements.txt          # DependênciasPR
+├── .env                     # Suas credenciais (não commitar!)
+├── .eExemplo de Uso Completo
+
+```bash
+# 1. Instalar (apenas primeira vez)
+pip install -r requirements.txt
+
+# 2. Configurar .env
+# Edite o arquivo .env com seu token e repositório
+
+# 3. Extrair comentários do PR #102
+python extrair_pr_especifico.py 102
+
+# 4. Ver resultado
+# Arquivo: comments-gemimi/bot_comments_PR102.json
 ```
-
-### Campos do Formato Filtrado (4 essenciais):
-
-- **file_path**: Caminho do arquivo comentado
-- **diff_hunk**: Contexto do diff (mostra mudanças)
-- **code_snippet**: Código extraído do diff
-- **comment_body**: Texto completo do comentário/sugestão do bot
-
-- **pr_number**: Número do Pull Request
-- **pr_title**: Título do PR
-- **pr_url**: Link para o PR
-- **pr_state**: Estado (open, closed, merged)
-- **file_path**: Caminho do arquivo comentado
-- **line**: Linha atual do código comentada
-- **original_line**: Linha original no diff
-- **diff_hunk**: Contexto do diff (mostra mudanças)
-- **code_snippet**: Código extraído do diff
-- **comment_body**: Texto completo do comentário/sugestão do bot
-- **comment_created_at**: Data de criação do comentário
-- **comment_updated_at**: Data de última atualização
-- **comment_url**: Link direto para o comentário
-- **commit_id**: ID do commit comentado
-- **in_reply_to_id**: ID se for resposta a outro comentário
-
-## ⚙️ Personalização
-
-### Limitar Número de PRs (Para Testes)
-
-Edite o arquivo `github_pr_comments_extractor.py` na função `main()`:
-
-```python
-# Processar apenas os 10 PRs mais recentes
-comments = extractor.extract_all_bot_comments(max_prs=10)
 ```
+✅ Relatório completo  
+✅ Histórico com timestamps  
+✅ Links para GitHub  
 
-### Mudar Nome do Bot
+## 📦 Dependências
 
-Se o bot tiver um nome ligeiramente diferente, edite a classe:
-
-```python
-self.bot_username = "pr-validation-gemini-2"  # Altere aqui
-```
-
-### Alterar Nome do Arquivo de Saída
-
-```python
-output_file = "meus_comentarios.json"  # Altere aqui
-extractor.save_to_json(comments, output_file)
-```
-
-## 🐛 Troubleshooting
-
-### Erro: "GITHUB_TOKEN não definida"
-- Certifique-se de ter criado o arquivo `.env`
-- Verifique se o token está corretamente configurado no `.env`
-
-### Erro 401 (Unauthorized)
-- Token inválido ou expirado
-- Gere um novo token no GitHub
-
-### Erro 403 (Forbidden)
-- Token sem permissões necessárias
-- Adicione permissão de leitura em Pull Requests
-
-### Erro 404 (Not Found)
-- Repositório não existe ou token não tem acesso
-- Verifique `GITHUB_OWNER` e `GITHUB_REPO` no `.env`
-
-### Nenhum comentário encontrado
-- Verifique se o bot realmente comentou nos PRs
-- Confirme se o nome do bot está correto
-- O bot pode ter um username diferente (ex: `pr-validation-gemini-2[bot]`)
-
-## 📊 Exemplos de Uso
-
-### Analisar apenas PRs abertos
-
-Modifique o método na classe:
-
-```python
-prs = self.get_pull_requests(state="open")  # Apenas abertos
-```
-
-### Filtrar por data
-
-Adicione filtro após extrair comentários:
-
-```python
-from datetime import datetime, timedelta
-
-# Apenas comentários dos últimos 30 dias
-data_limite = datetime.now() - timedelta(days=30)
-comentarios_recentes = [
-    c for c in comments 
-    if datetime.fromisoformat(c['comment_created_at'].replace('Z', '+00:00')) > data_limite
-]
-```
-
-## 📝 Licença
-
-Este projeto é de código aberto e pode ser usado livremente.
-
-## 🤝 Contribuições
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou pull requests.
-
----
-
-**Desenvolvido para automatizar a extração de comentários do bot pr-validation-gemini-2** 🤖
+- `requests` - Chamadas à API do GitHub
+- `python-dotenv` - Gerenciamento de variáveis de ambiente

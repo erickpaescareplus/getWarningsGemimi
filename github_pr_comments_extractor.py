@@ -372,44 +372,25 @@ def main():
         print("⚠️ AVISO: Verificação SSL desabilitada")
     print()
     
-    # Pergunta ao usuário se quer processar um PR específico ou todos
-    print("Opções de extração:")
-    print("  1 - Extrair de um PR específico")
-    print("  2 - Extrair de todos os PRs")
-    print()
-    
-    escolha = input("Digite sua escolha (1 ou 2): ").strip()
-    
-    specific_pr = None
-    
-    if escolha == "1":
-        while True:
-            pr_input = input("\nDigite o número do Pull Request: ").strip()
-            try:
-                specific_pr = int(pr_input)
-                if specific_pr <= 0:
-                    print("❌ Número inválido! Digite um número positivo.")
-                    continue
-                break
-            except ValueError:
-                print("❌ Entrada inválida! Digite apenas números.")
-    elif escolha == "2":
-        print("\n✓ Processando todos os Pull Requests...")
-    else:
-        print("\n⚠️ Opção inválida! Processando todos os PRs por padrão...")
+    # Solicita o número do PR
+    while True:
+        pr_input = input("Digite o número do Pull Request: ").strip()
+        try:
+            specific_pr = int(pr_input)
+            if specific_pr <= 0:
+                print("❌ Número inválido! Digite um número positivo.")
+                continue
+            break
+        except ValueError:
+            print("❌ Entrada inválida! Digite apenas números.")
     
     print()
     
-    # Você pode limitar o número de PRs a processar para testes
-    # comments = extractor.extract_all_bot_comments(max_prs=10)
+    # Extrai comentários do PR específico
     comments = extractor.extract_all_bot_comments(specific_pr=specific_pr, filtered=True)
     
     # Salva em JSON
-    if specific_pr:
-        output_file = f"bot_comments_PR{specific_pr}.json"
-    else:
-        output_file = "bot_comments.json"
-    
+    output_file = f"bot_comments_PR{specific_pr}.json"
     extractor.save_to_json(comments, output_file, filtered=True)
     
     print("\n" + "="*60)
