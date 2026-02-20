@@ -14,6 +14,7 @@ load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_OWNER = os.getenv("GITHUB_OWNER")
 GITHUB_REPO = os.getenv("GITHUB_REPO")
+BOT_USERNAME = os.getenv("BOT_USERNAME")
 DISABLE_SSL_VERIFY = os.getenv("DISABLE_SSL_VERIFY", "false").lower() == "true"
 
 # Validação
@@ -42,12 +43,14 @@ extractor = GitHubPRCommentsExtractor(
     token=GITHUB_TOKEN,
     owner=GITHUB_OWNER,
     repo=GITHUB_REPO,
+    bot_username=BOT_USERNAME,
     verify_ssl=not DISABLE_SSL_VERIFY
 )
 
 print("="*60)
 print(f"EXTRAINDO COMENTÁRIOS DO PR #{pr_number}")
 print("="*60)
+print(f"🤖 Bot: {extractor.bot_username}*")
 print()
 
 # Extrai comentários (formato filtrado com apenas 4 campos)

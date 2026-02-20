@@ -15,7 +15,7 @@ load_dotenv()
 class GitHubPRCommentsExtractor:
     """Classe para extrair comentários de Pull Requests do GitHub"""
     
-    def __init__(self, token: str, owner: str, repo: str, verify_ssl: bool = True):
+    def __init__(self, token: str, owner: str, repo: str, bot_username: str = None, verify_ssl: bool = True):
         """
         Inicializa o extrator de comentários
         
@@ -23,6 +23,7 @@ class GitHubPRCommentsExtractor:
             token: Token de acesso do GitHub (fine-grained ou classic)
             owner: Dono do repositório
             repo: Nome do repositório
+            bot_username: Nome do bot (opcional, padrão busca por 'pr-validation-gemin' para pegar todas variações)
             verify_ssl: Verificar certificado SSL (False em ambientes corporativos com proxy)
         """
         self.token = token
@@ -34,7 +35,8 @@ class GitHubPRCommentsExtractor:
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28"
         }
-        self.bot_username = "pr-validation-gemini-2"
+        # Usa padrão amplo se não especificado (pega gemini-2, gemini, gemimi, etc.)
+        self.bot_username = bot_username if bot_username else "pr-validation-gemin"
         self.verify_ssl = verify_ssl
         
         # Suprime aviso de SSL se desabilitado
@@ -119,7 +121,7 @@ class GitHubPRCommentsExtractor:
     
     def filter_bot_comments(self, comments: List[Dict]) -> List[Dict]:
         """
-        Filtra apenas comentários do bot pr-validation-gemini-2
+        Filtra comentários do bot de validação (pr-validation-gemini-2, pr-validation-gemimi, etc.)
         
         Args:
             comments: Lista de todos os comentários
@@ -133,8 +135,8 @@ class GitHubPRCommentsExtractor:
             user = comment.get("user", {})
             username = user.get("login", "")
             
-            # Verifica se é o bot (pode ser exato ou conter o nome)
-            if self.bot_username.lower() in username.lower() or username.lower() == self.bot_username.lower():
+            # Busca ampla: verifica se o username contém o padrão do bot
+            if self.bot_username.lower() in username.lower():
                 bot_comments.append(comment)
         
         return bot_comments
@@ -336,6 +338,7 @@ def main():
     GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
     GITHUB_OWNER = os.getenv("GITHUB_OWNER")  # Ex: "microsoft"
     GITHUB_REPO = os.getenv("GITHUB_REPO")    # Ex: "vscode"
+    BOT_USERNAME = os.getenv("BOT_USERNAME")  # Opcional: nome do bot (padrão busca por 'pr-validation-gemin')
     
     # Opção para desabilitar verificação SSL (ambientes corporativos com proxy)
     DISABLE_SSL_VERIFY = os.getenv("DISABLE_SSL_VERIFY", "false").lower() == "true"
@@ -361,15 +364,17 @@ def main():
         token=GITHUB_TOKEN,
         owner=GITHUB_OWNER,
         repo=GITHUB_REPO,
+        bot_username=BOT_USERNAME,
         verify_ssl=not DISABLE_SSL_VERIFY
     )
     
     # Extrai comentários
     print("="*60)
-    print("EXTRATOR DE COMENTÁRIOS DO BOT PR-VALIDATION-GEMINI-2")
+    print("EXTRATOR DE COMENTÁRIOS DO BOT DE VALIDAÇÃO")
     print("="*60)
+    print(f"🤖 Bot: {extractor.bot_username}*")
     if DISABLE_SSL_VERIFY:
-        print("⚠️ AVISO: Verificação SSL desabilitada")
+        print("⚠️ Verificação SSL desabilitada")
     print()
     
     # Solicita o número do PR
